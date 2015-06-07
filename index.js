@@ -1,20 +1,21 @@
 var http = require("http");
-var router = require("./router/main");
-var MIME_JSON = "application/json";
+var router = require("./router");
+
+var localPort=9527;
 
 var Exiler = {};
 
 Exiler.server = function (options, port) {
-	!port && (port = 9527);
+	!port && (port = localPort);
 
 	router.init(options);
 
 	http.createServer(function (req, res) {
 		var resObj = router.parse(req.url);
 		res.writeHead(resObj.httpStatus, {
-			"Content-Type": MIME_JSON
+			"Content-Type": resObj.mime
 		});
-		res.end(JSON.stringify(resObj.contentBody));
+		res.end(resObj.contentBody);
 	}).listen(port);
 };
 
