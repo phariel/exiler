@@ -1,16 +1,18 @@
 var exiler = require("./index");
 
-var config = {
-	index: {
-		ref: function () {
-			return {aaa: 1};
-		},
-		page: {
-			ref: function () {
-				return {bbb: 2};
-			}
-		}
-	}
+var options = {
+    route: {
+        index: {
+            data: function () {
+                return {aaa: 1};
+            },
+            page: {
+                data: function () {
+                    return {bbb: 2};
+                }
+            }
+        }
+    }
 };
 
-exiler.server(config, 9528);
+exiler.server(options, 9528);

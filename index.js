@@ -4,10 +4,10 @@ var MIME_JSON = "application/json";
 
 var Exiler = {};
 
-Exiler.server = function (config, port) {
+Exiler.server = function (options, port) {
 	!port && (port = 9527);
 
-	router.init(config);
+	router.init(options);
 
 	http.createServer(function (req, res) {
 		var resObj = router.parse(req.url);
