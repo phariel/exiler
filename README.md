@@ -10,7 +10,8 @@ An easy&amp;&amp;useful restful-server with node.js
 
     var options = {
 	    route: {
-	        // url goes to "http://localhost:1080" or "http://localhost:1080/" or "http://localhost:1080/index"
+	        // url goes to "http://localhost:1080" or "http://localhost:1080/"
+	        // or "http://localhost:1080/index"
 		    index: {
 			    data: function () {
 				    return {aaa: 1};
@@ -30,7 +31,7 @@ An easy&amp;&amp;useful restful-server with node.js
     
 `port` should be optional, default to 9527
 
-You should create a new folder named `public` in your app root folder and put all of static files (js, css, etc) into it, and use `/public/xxx/xxx.css` url to visit by your static files structure.
+You should create a new folder named `public` in your app root folder and put all of static files (js, css, etc) into it, and use `http://localhost:1080/public/xxx/xxx.css` url to visit by your static files structure.
 
 You should create a new folder named `template` in your app root folder and put `.ejs` template into it.
 
@@ -48,5 +49,7 @@ This route should render html page combined with ejs template and data automatic
 ### Todo:
 
 Continue to refine code structure.
+
+Implement data dynamic fetching.
 
 Using cache functionality instead of reading file directly from disk. 
