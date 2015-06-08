@@ -1,7 +1,7 @@
 var http = require("http");
 var router = require("./router");
 
-var localPort=9527;
+var localPort = 9527;
 
 var Exiler = {};
 
