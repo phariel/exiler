@@ -1,52 +1,58 @@
 var ejs = require("ejs");
 var fs = require("fs");
+var errorHandler = require("../errorHandler");
 
 var rootPath = process.cwd();
-var ejsFolder = rootPath + "/ejs/";
+var ejsFolder = rootPath + "/template/";
+
+var MIME_JSON = "application/json";
+var MIME_HTML = "text/html";
 
 var DynamicModule = {};
 
-DynamicModule.parse = function (urlArr, route) {
-    var loopObj = route;
-    var httpStatus = 200;
-    var contentBody;
-    var mime = "application/json";
+DynamicModule.parse = function (path, route) {
+	var loopObj = route;
+	var httpStatus = 200;
+	var contentBody;
+	var mime = MIME_JSON;
 
-    urlArr.forEach(function (v, i) {
-        loopObj = loopObj[v];
-        if (!loopObj) {
-            httpStatus = 404;
-        }
-    });
+	var urlArr = path.replace(/^\//, "").split("/");
 
+	urlArr.forEach(function (v, i) {
+		loopObj = v.length === 0 ? loopObj["index"] : loopObj[v];
+		if (!loopObj) {
+			httpStatus = 404;
+		}
+	});
 
-    if (httpStatus === 404) {
-        mime = "text/html";
-        contentBody = "404 not found";
-    } else {
-        contentBody = loopObj.data();
+	if (httpStatus === 404) {
+		return errorHandler.getNotFound();
+	}
 
-        if (loopObj.file) {
-            if (loopObj.file.indexOf(".ejs") > -1) {
-                var file = ejsFolder + loopObj.file;
-                file = file.replace(/\\/g, "\/");
-                console.log("file: ", file);
-                if (fs.existsSync(file)) {
-                    var template = fs.readFileSync(file, "utf8");
-                    contentBody = ejs.render(template, contentBody);
-                    mime = "text/html";
-                }
-            }
-        }
-    }
+	contentBody = (typeof loopObj.data === "function") ? loopObj.data() : loopObj.data;
 
-    typeof contentBody === "object" && (contentBody = JSON.stringify(contentBody));
+	var templateFile = loopObj.template;
 
-    return {
-        mime: mime,
-        httpStatus: httpStatus,
-        contentBody: contentBody
-    };
+	if (templateFile) {
+		if (templateFile.indexOf(".ejs") > -1) {
+			var file = ejsFolder + templateFile;
+			file = file.replace(/\\/g, "\/");
+
+			if (fs.existsSync(file)) {
+				var template = fs.readFileSync(file, "utf8");
+				contentBody = ejs.render(template, contentBody);
+				mime = MIME_HTML;
+			}
+		}
+	}
+
+	typeof contentBody === "object" && (contentBody = JSON.stringify(contentBody));
+
+	return {
+		mime: mime,
+		httpStatus: httpStatus,
+		contentBody: contentBody
+	};
 };
 
 module.exports = DynamicModule;
