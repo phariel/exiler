@@ -8,9 +8,14 @@ var ejsFolder = rootPath + "/template/";
 var MIME_JSON = "application/json";
 var MIME_HTML = "text/html";
 
+var KEY_DATA = "ex_data";
+var KEY_TEMPLATE = "ex_template";
+
 var DynamicModule = {};
 
 DynamicModule.parse = function (path, route) {
+	path = path.toLowerCase();
+
 	var loopObj = route;
 	var httpStatus = 200;
 	var contentBody;
@@ -18,10 +23,26 @@ DynamicModule.parse = function (path, route) {
 
 	var urlArr = path.replace(/^\//, "").split("/");
 
-	urlArr.forEach(function (v, i) {
-		loopObj = v.length === 0 ? loopObj["index"] : loopObj[v];
+	urlArr.every(function (v, i) {
+		var hasValue = false;
+
+		if (v.length === 0) {
+			loopObj = loopObj["index"];
+		} else {
+			Object.keys(loopObj).forEach(function (keyname, j) {
+				if (v === keyname.toLowerCase()) {
+					loopObj = loopObj[keyname];
+					hasValue = true;
+				}
+			});
+			!hasValue && (loopObj = null);
+		}
+
 		if (!loopObj) {
 			httpStatus = 404;
+			return false;
+		} else {
+			return true;
 		}
 	});
 
@@ -29,9 +50,11 @@ DynamicModule.parse = function (path, route) {
 		return errorHandler.getNotFound();
 	}
 
-	contentBody = (typeof loopObj.data === "function") ? loopObj.data() : loopObj.data;
+	contentBody = loopObj[KEY_DATA];
+	typeof contentBody === "function" && (contentBody = contentBody());
+	!contentBody && (contentBody = {});
 
-	var templateFile = loopObj.template;
+	var templateFile = loopObj[KEY_TEMPLATE];
 
 	if (templateFile) {
 		if (templateFile.indexOf(".ejs") > -1) {
