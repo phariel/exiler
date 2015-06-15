@@ -1,6 +1,7 @@
 var ejs = require("ejs");
 var fs = require("fs");
 var errorHandler = require("../errorHandler");
+var cacheHandler = require("../cacheHandler");
 
 var rootPath = process.cwd();
 var ejsFolder = rootPath + "/template/";
@@ -62,7 +63,16 @@ DynamicModule.parse = function (path, route) {
 			file = file.replace(/\\/g, "\/");
 
 			if (fs.existsSync(file)) {
-				var template = fs.readFileSync(file, "utf8");
+				var cache = cacheHandler.getCache(path);
+				var template;
+
+				if (cache) {
+					template = cache;
+				} else {
+					template = fs.readFileSync(file, "utf8");
+					cacheHandler.setCache(path, template);
+				}
+
 				contentBody = ejs.render(template, contentBody);
 				mime = MIME_HTML;
 			}

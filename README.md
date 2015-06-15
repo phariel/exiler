@@ -58,5 +58,3 @@ This route should render html page combined with ejs template and data automatic
 Continue to refine code structure.
 
 Implement data dynamic fetching.
-
-Using cache functionality instead of reading file directly from disk. 
