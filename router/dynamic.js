@@ -11,6 +11,7 @@ var MIME_HTML = "text/html";
 
 var KEY_DATA = "ex_data";
 var KEY_TEMPLATE = "ex_template";
+var KEY_PARAM_REG = /^ex_param_/;
 
 var DynamicModule = {};
 
@@ -21,6 +22,7 @@ DynamicModule.parse = function (path, route) {
 	var httpStatus = 200;
 	var contentBody;
 	var mime = MIME_JSON;
+	var params = {};
 
 	var urlArr = path.replace(/^\//, "").split("/");
 
@@ -30,12 +32,21 @@ DynamicModule.parse = function (path, route) {
 		if (v.length === 0) {
 			loopObj = loopObj["index"];
 		} else {
-			Object.keys(loopObj).forEach(function (keyname, j) {
+			Object.keys(loopObj).every(function (keyname, j) {
 				if (v === keyname.toLowerCase()) {
 					loopObj = loopObj[keyname];
 					hasValue = true;
+					return false;
 				}
+				else if (keyname.match(KEY_PARAM_REG)) {
+					params[keyname.replace(KEY_PARAM_REG, "")] = v;
+					loopObj = loopObj[keyname];
+					hasValue = true;
+					return false;
+				}
+				return true;
 			});
+
 			!hasValue && (loopObj = null);
 		}
 
@@ -52,7 +63,7 @@ DynamicModule.parse = function (path, route) {
 	}
 
 	contentBody = loopObj[KEY_DATA];
-	typeof contentBody === "function" && (contentBody = contentBody());
+	typeof contentBody === "function" && (contentBody = contentBody(params));
 	!contentBody && (contentBody = {});
 
 	var templateFile = loopObj[KEY_TEMPLATE];
