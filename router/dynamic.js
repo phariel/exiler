@@ -23,6 +23,58 @@ DynamicModule.parse = function (path, route) {
 	var contentBody;
 	var mime = MIME_JSON;
 	var params = {};
+	var callback;
+	var contentData;
+	var templateFile;
+	var isSync = false;
+
+	var exec = function () {
+		if (!callback || !contentData) {
+			return;
+		}
+		if (templateFile) {
+			if (templateFile.indexOf(".ejs") > -1) {
+				var file = ejsFolder + templateFile;
+				file = file.replace(/\\/g, "\/");
+
+				if (fs.existsSync(file)) {
+					var cache = cacheHandler.getCache(path);
+					var template;
+
+					if (cache) {
+						template = cache;
+					} else {
+						template = fs.readFileSync(file, "utf8");
+						cacheHandler.setCache(path, template);
+					}
+
+					contentData = ejs.render(template, contentData);
+					mime = MIME_HTML;
+				}
+			}
+		}
+
+		typeof contentData === "object" && (contentData = JSON.stringify(contentData));
+
+		contentData && callback({
+			mime: mime,
+			httpStatus: httpStatus,
+			contentBody: contentData
+		});
+	};
+
+	var resolve = function (data) {
+		contentData = data;
+		exec();
+	};
+
+	var done = function (cb) {
+		cb && (callback = cb);
+		if (isSync) {
+			contentData = contentBody;
+		}
+		exec();
+	};
 
 	var urlArr = path.replace(/^\//, "").split("/");
 
@@ -63,39 +115,16 @@ DynamicModule.parse = function (path, route) {
 	}
 
 	contentBody = loopObj[KEY_DATA];
-	typeof contentBody === "function" && (contentBody = contentBody(params));
-	!contentBody && (contentBody = {});
+	templateFile = loopObj[KEY_TEMPLATE];
 
-	var templateFile = loopObj[KEY_TEMPLATE];
-
-	if (templateFile) {
-		if (templateFile.indexOf(".ejs") > -1) {
-			var file = ejsFolder + templateFile;
-			file = file.replace(/\\/g, "\/");
-
-			if (fs.existsSync(file)) {
-				var cache = cacheHandler.getCache(path);
-				var template;
-
-				if (cache) {
-					template = cache;
-				} else {
-					template = fs.readFileSync(file, "utf8");
-					cacheHandler.setCache(path, template);
-				}
-
-				contentBody = ejs.render(template, contentBody);
-				mime = MIME_HTML;
-			}
-		}
+	if (typeof contentBody === "function") {
+		contentBody(resolve, params);
+	} else if (typeof contentBody === "object") {
+		isSync = true;
 	}
 
-	typeof contentBody === "object" && (contentBody = JSON.stringify(contentBody));
-
 	return {
-		mime: mime,
-		httpStatus: httpStatus,
-		contentBody: contentBody
+		done: done
 	};
 };
 
