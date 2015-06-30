@@ -26,41 +26,45 @@ DynamicModule.parse = function (path, route) {
 	var callback;
 	var contentData;
 	var templateFile;
-	var isSync = false;
 
 	var exec = function () {
 		if (!callback || !contentData) {
 			return;
 		}
-		if (templateFile) {
-			if (templateFile.indexOf(".ejs") > -1) {
-				var file = ejsFolder + templateFile;
-				file = file.replace(/\\/g, "\/");
 
-				if (fs.existsSync(file)) {
-					var cache = cacheHandler.getCache(path);
-					var template;
+		if (httpStatus === 404) {
+			callback(errorHandler.getNotFound());
+		} else {
+			if (templateFile) {
+				if (templateFile.indexOf(".ejs") > -1) {
+					var file = ejsFolder + templateFile;
+					file = file.replace(/\\/g, "\/");
 
-					if (cache) {
-						template = cache;
-					} else {
-						template = fs.readFileSync(file, "utf8");
-						cacheHandler.setCache(path, template);
+					if (fs.existsSync(file)) {
+						var cache = cacheHandler.getCache(templateFile);
+						var template;
+
+						if (cache) {
+							template = cache;
+						} else {
+							template = fs.readFileSync(file, "utf8");
+							cacheHandler.setCache(templateFile, template);
+						}
+
+						contentData = ejs.render(template, contentData);
+						mime = MIME_HTML;
 					}
-
-					contentData = ejs.render(template, contentData);
-					mime = MIME_HTML;
 				}
 			}
+
+			typeof contentData === "object" && (contentData = JSON.stringify(contentData));
+
+			callback({
+				mime: mime,
+				httpStatus: httpStatus,
+				contentBody: contentData
+			});
 		}
-
-		typeof contentData === "object" && (contentData = JSON.stringify(contentData));
-
-		contentData && callback({
-			mime: mime,
-			httpStatus: httpStatus,
-			contentBody: contentData
-		});
 	};
 
 	var resolve = function (data) {
@@ -70,9 +74,6 @@ DynamicModule.parse = function (path, route) {
 
 	var done = function (cb) {
 		cb && (callback = cb);
-		if (isSync) {
-			contentData = contentBody;
-		}
 		exec();
 	};
 
@@ -110,17 +111,17 @@ DynamicModule.parse = function (path, route) {
 		}
 	});
 
-	if (httpStatus === 404) {
-		return errorHandler.getNotFound();
-	}
+	if (loopObj) {
+		contentBody = loopObj[KEY_DATA];
+		templateFile = loopObj[KEY_TEMPLATE];
 
-	contentBody = loopObj[KEY_DATA];
-	templateFile = loopObj[KEY_TEMPLATE];
-
-	if (typeof contentBody === "function") {
-		contentBody(resolve, params);
-	} else if (typeof contentBody === "object") {
-		isSync = true;
+		if (typeof contentBody === "function") {
+			contentBody(resolve, params);
+		} else if (typeof contentBody === "object") {
+			contentData = contentBody;
+		}
+	} else {
+		contentData = "none";
 	}
 
 	return {
