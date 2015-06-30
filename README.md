@@ -14,10 +14,10 @@ An easy&amp;&amp;useful restful-server with node.js
 	        // or "http://localhost:1080/"
 	        // or "http://localhost:1080/index"
 		    index: {
-			    ex_data: function () {
-				    return {
+			    ex_data: function (resolve) {
+				    resolve({
 				    	indexData: "I'm the index"
-				    };
+				    });
 			    }
 		    },
 		    // url goes to "http://localhost:1080/pageaction"
@@ -53,6 +53,20 @@ If your route goes to:
 
 This route should render html page combined with ejs template and data automatically.
 
+
+### Newly in v0.5.x:
+You could use
+
+	{
+		ex_data: function(resolve){
+			resolve({
+				data: "my data"
+			});
+		} 
+	}
+	
+for async data fetching.
+
 ### Newly in v0.4.x:
 Implemented param route.
 
@@ -64,18 +78,18 @@ Implemented param route.
 				}
 			},
 			ex_param_id: {
-				ex_data: function (param) {
-					return {
+				ex_data: function (resolve, param) {
+					resolve({
 						id: param.id
-					}
+					});
 				},
 				ex_template: "id.ejs",
 				ex_param_secondId: {
-					ex_data: function (param) {
-						return {
+					ex_data: function (resolve, param) {
+						resolve({
 							id: param.id,
 							secondId: param.secondId
-						}
+						});
 					},
 					ex_template: "id.ejs"
 				}

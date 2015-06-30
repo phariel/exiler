@@ -12,10 +12,12 @@ Exiler.server = function (options, port) {
 
 	http.createServer(function (req, res) {
 		var resObj = router.parse(req.url);
-		res.writeHead(resObj.httpStatus, {
-			"Content-Type": resObj.mime
+		resObj.done(function (data) {
+			res.writeHead(data.httpStatus, {
+				"Content-Type": data.mime
+			});
+			res.end(data.contentBody);
 		});
-		res.end(resObj.contentBody);
 	}).listen(port);
 };
 

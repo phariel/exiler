@@ -25,14 +25,23 @@ StaticModule.parse = function (path) {
 			cacheHandler.setCache(path, contentBody);
 		}
 	} else {
-		return errorHandler.getNotFound();
+		var notFound = errorHandler.getNotFound();
+		mime = notFound.mime;
+		httpStatus = notFound.httpStatus;
+		contentBody = notFound.contentBody;
 	}
 
+	var done = function (cb) {
+		cb({
+			mime: mime,
+			httpStatus: httpStatus,
+			contentBody: contentBody
+		});
+	};
+
 	return {
-		mime: mime,
-		httpStatus: httpStatus,
-		contentBody: contentBody
-	}
+		done: done
+	};
 };
 
 module.exports = StaticModule;
