@@ -10,9 +10,9 @@ An easy&amp;&amp;useful restful-server with node.js
 
     var options = {
 	    route: {
-	        // url goes to "http://localhost:1080" 
-	        // or "http://localhost:1080/"
-	        // or "http://localhost:1080/index"
+	        // url goes to "http://mydomain.com:1080" 
+	        // or "http://mydomain.com:1080/"
+	        // or "http://mydomain.com:1080/index"
 		    index: {
 			    ex_data: function (resolve) {
 				    resolve({
@@ -20,8 +20,8 @@ An easy&amp;&amp;useful restful-server with node.js
 				    });
 			    }
 		    },
-		    // url goes to "http://localhost:1080/pageaction"
-		    // or "http://localhost:1080/pageAction"
+		    // url goes to "http://mydomain.com:1080/pageaction"
+		    // or "http://mydomain.com:1080/pageAction"
 		    pageAction: {
 			    ex_data: {
 				    pageData: "I'm the page"
@@ -38,7 +38,7 @@ An easy&amp;&amp;useful restful-server with node.js
 
 Using `ex_data` for data fetching and `ex_template` for template fetching.
 
-You should create a new folder named `public` in your app root folder and put all of static files (js, css, etc) into it, and use `http://localhost:1080/public/xxx/xxx.css` url to visit by your static files structure.
+You should create a new folder named `public` in your app root folder and put all of static files (js, css, etc) into it, and use `http://mydomain.com:1080/public/xxx/xxx.css` url to visit by your static files structure.
 
 You should create a new folder named `template` in your app root folder and put `.ejs` template into it.
 
@@ -53,6 +53,23 @@ If your route goes to:
 
 This route should render html page combined with ejs template and data automatically.
 
+### Newly in v0.5.5:
+You could customize `ejs` template folder path, `public` file folder path and url:
+
+	var options = {
+		// EJS folder path changes to "/foo/ejs"
+		templateFolder: "foo/ejs",
+		
+		// Public file folder path changes to "/bar/asset" 
+		publicFolder: "bar/asset",
+		
+		// Public file address changes to "http://mydomain.com:1080/asseturl/"
+		publicurl: "/asseturl",
+		
+		route: {
+			// ......
+		}
+	};
 
 ### Newly in v0.5.x:
 You could use
@@ -116,11 +133,11 @@ id.ejs:
 		</body>
 	</html>
 	
-If url goes to `http://localhost:1080/param1`, it would display `<h1>param1</h1>`.
+If url goes to `http://mydomain.com:1080/param1`, it would display `<h1>param1</h1>`.
 
-If url goes to `http://localhost:1080/param1/param2`, it would display `<h1>param1</h1><h2>param2</h2>`.
+If url goes to `http://mydomain.com:1080/param1/param2`, it would display `<h1>param1</h1><h2>param2</h2>`.
 
-If url goes to'http://localhost:1080/index', it would display `{id: "I'm the index"}` instead of `<h1>I'm the index</h1>`.
+If url goes to'http://mydomain.com:1080/index', it would display `{id: "I'm the index"}` instead of `<h1>I'm the index</h1>`.
 
 Because priority of `static` route is higher than `ex_param` route.
 
