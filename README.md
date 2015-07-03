@@ -1,4 +1,7 @@
 # exiler
+
+[![Build Status](https://travis-ci.org/phariel/exiler.svg?branch=master)](https://travis-ci.org/phariel/exiler)
+
 An easy&amp;&amp;useful restful-server with node.js
 
 `$ npm install exiler`
