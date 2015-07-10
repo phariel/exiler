@@ -1,6 +1,6 @@
 {
   "name": "exiler",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "An easy&amp;&amp;useful restful-server with node.js",
   "main": "lib/exiler.js",
   "dependencies": {
